@@ -97,8 +97,9 @@ class OracleVerifier:
             expected_total = item['quantity'] * item['unit_price']
             actual_total = item['total']
             
-            # Allow 1% tolerance for rounding
-            if abs(expected_total - actual_total) > (expected_total * 0.01):
+            # Allow 1% tolerance for rounding (or 0.01 minimum for zero values)
+            tolerance = max(abs(expected_total * 0.01), 0.01)
+            if abs(expected_total - actual_total) > tolerance:
                 issues.append(
                     f"Item {index + 1}: Total calculation mismatch "
                     f"(expected {expected_total:.2f}, got {actual_total:.2f})"

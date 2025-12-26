@@ -231,12 +231,37 @@ class AgentFramework:
         
         for chunk in chunks:
             # Determine which agent(s) should process this chunk
-            # For now, use all agents
-            for agent_type, agent in self.agents.items():
+            # In production, this would use AI to route to appropriate agents
+            # For now, use all agents but this can be optimized
+            selected_agents = self._select_agents_for_chunk(chunk)
+            
+            for agent in selected_agents:
                 result = agent.process_chunk(chunk)
                 results.append(result)
                 
         return results
+    
+    def _select_agents_for_chunk(self, chunk: Any) -> List[BaseAgent]:
+        """
+        Select appropriate agents for a chunk based on content
+        
+        In production, this would analyze chunk content and route to
+        relevant agents. For now, returns all agents.
+        
+        Args:
+            chunk: DocumentChunk to analyze
+            
+        Returns:
+            List of agents that should process this chunk
+        """
+        # TODO: Implement intelligent agent selection based on:
+        # - Chunk metadata
+        # - File type
+        # - Content keywords
+        # - Previous processing results
+        
+        # For now, return all agents
+        return list(self.agents.values())
     
     def get_agent_stats(self) -> Dict[str, Any]:
         """Get statistics about agent processing"""

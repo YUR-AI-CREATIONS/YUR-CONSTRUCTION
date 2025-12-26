@@ -35,8 +35,10 @@ class DocumentChunker:
     Decomposes construction plans into structured chunks for processing
     """
     
-    def __init__(self, chunk_size: int = 2000):
+    def __init__(self, chunk_size: int = 2000, max_recursion_depth: int = 5):
         self.chunk_size = chunk_size
+        self.max_recursion_depth = max_recursion_depth
+        self._current_depth = 0
         
     def chunk_document(self, file_info: Dict[str, Any]) -> List[DocumentChunk]:
         """
@@ -155,9 +157,22 @@ class DocumentChunker:
         return chunks
     
     def _chunk_archive(self, file_info: Dict[str, Any]) -> List[DocumentChunk]:
-        """Process files from archive"""
+        """Process files from archive with depth limit"""
         chunks = []
         extracted_files = file_info.get('extracted_files', [])
+        
+        # Check recursion depth
+        self._current_depth += 1
+        if self._current_depth > self.max_recursion_depth:
+            # Too deep - create single chunk for remaining files
+            chunk = DocumentChunk(
+                chunk_id=f"archive_depth_limit_{self._current_depth}",
+                content={'files': extracted_files, 'type': 'archive_overflow'},
+                metadata={'warning': 'Max recursion depth reached', 'file_count': len(extracted_files)}
+            )
+            chunks.append(chunk)
+            self._current_depth -= 1
+            return chunks
         
         for file_data in extracted_files:
             # Create a sub-file-info for recursive processing
@@ -170,5 +185,6 @@ class DocumentChunker:
             # Recursively chunk each file
             sub_chunks = self.chunk_document(sub_file_info)
             chunks.extend(sub_chunks)
-            
+        
+        self._current_depth -= 1
         return chunks

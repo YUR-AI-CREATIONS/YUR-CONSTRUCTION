@@ -149,6 +149,7 @@ class ExcelExporter:
         # Headers
         row = 1
         headers = ['Item #', 'CSI Div', 'Description', 'Scope', 'Quantity', 'Unit', 'Unit Price', 'Total', 'Agent']
+        num_columns = len(headers)
         for col, header in enumerate(headers, 1):
             cell = sheet.cell(row=row, column=col)
             cell.value = header
@@ -175,7 +176,9 @@ class ExcelExporter:
             # Division header
             division_name = get_division_name(division)
             sheet.cell(row=row, column=1).value = f"DIVISION {division}"
-            sheet.merge_cells(f'A{row}:I{row}')
+            # Use dynamic column count
+            last_col_letter = get_column_letter(num_columns)
+            sheet.merge_cells(f'A{row}:{last_col_letter}{row}')
             cell = sheet.cell(row=row, column=1)
             cell.font = division_font
             cell.fill = division_fill

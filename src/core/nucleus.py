@@ -156,7 +156,11 @@ class NucleusAggregator:
             item.get('quantity', 0) * item.get('unit_price', 0) 
             for item in items
         )
-        avg_unit_price = total_qty_price / total_quantity if total_quantity > 0 else 0
+        if total_quantity > 0:
+            avg_unit_price = total_qty_price / total_quantity
+        else:
+            # If no quantity, log warning and use simple average of unit prices
+            avg_unit_price = sum(item.get('unit_price', 0) for item in items) / len(items) if items else 0
         
         # Combine agent IDs
         agent_ids = [item.get('agent_id', '') for item in items]
