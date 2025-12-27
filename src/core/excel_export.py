@@ -11,7 +11,12 @@ from datetime import datetime
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
-from ..utils.csi_divisions import get_division_name, get_all_divisions
+
+# Import CSI divisions functions
+try:
+    from ..utils.csi_divisions import get_division_name, get_all_divisions
+except ImportError:
+    from utils.csi_divisions import get_division_name, get_all_divisions
 
 
 class ExcelExporter:
@@ -146,9 +151,9 @@ class ExcelExporter:
         division_font = Font(size=11, bold=True)
         division_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
         
-        # Headers
+        # Headers - ENHANCED with Submittals and AIA Agreements
         row = 1
-        headers = ['Item #', 'CSI Div', 'Description', 'Scope', 'Quantity', 'Unit', 'Unit Price', 'Total', 'Agent']
+        headers = ['Item #', 'CSI Div', 'Description', 'Scope', 'Quantity', 'Unit', 'Unit Price', 'Total', 'Submittals', 'AIA Agreement', 'Agent']
         num_columns = len(headers)
         for col, header in enumerate(headers, 1):
             cell = sheet.cell(row=row, column=col)
@@ -201,7 +206,18 @@ class ExcelExporter:
                     sheet.cell(row=row, column=7).number_format = '$#,##0.00'
                     sheet.cell(row=row, column=8).value = item.get('total', 0)
                     sheet.cell(row=row, column=8).number_format = '$#,##0.00'
-                    sheet.cell(row=row, column=9).value = agent_id
+                    
+                    # Add submittal link
+                    submittal_link = item.get('submittal_link', f'submittals/DIV_{division}_submittals.pdf')
+                    sheet.cell(row=row, column=9).value = submittal_link
+                    sheet.cell(row=row, column=9).style = 'Hyperlink'
+                    
+                    # Add AIA Agreement link
+                    aia_link = item.get('aia_agreement_link', f'agreements/AIA_A401_DIV_{division}.pdf')
+                    sheet.cell(row=row, column=10).value = aia_link
+                    sheet.cell(row=row, column=10).style = 'Hyperlink'
+                    
+                    sheet.cell(row=row, column=11).value = agent_id
                     
                     item_num += 1
                     row += 1
@@ -209,7 +225,7 @@ class ExcelExporter:
             row += 1  # Blank row between divisions
         
         # Auto-adjust column widths
-        column_widths = [8, 8, 30, 25, 10, 8, 12, 12, 15]
+        column_widths = [8, 8, 30, 25, 10, 8, 12, 12, 25, 25, 15]
         for col, width in enumerate(column_widths, 1):
             sheet.column_dimensions[get_column_letter(col)].width = width
     
