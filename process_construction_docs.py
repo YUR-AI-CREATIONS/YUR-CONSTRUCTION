@@ -17,7 +17,10 @@ from typing import Dict, List, Optional
 from datetime import datetime
 import json
 
-# Add src to path
+# Add src to path for direct script execution
+# This is required because the script is run from repository root,
+# not installed as a package. In production deployment, use proper
+# package installation with setup.py instead.
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 # Import only the modules we need, avoiding heavy dependencies

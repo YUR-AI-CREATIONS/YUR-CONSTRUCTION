@@ -398,8 +398,8 @@ class DetailedCalculator:
                 "sidewalk": 0.05, # 100 lbs/CY
                 "driveway": 0.06, # 120 lbs/CY
             }
-            rebar_tons_per_cy = rebar_per_cy.get(element_type, 0.08) / 2000.0  # convert lbs to tons
-            rebar_tonnage = volume_cy * 2000 * rebar_tons_per_cy / 2000.0
+            rebar_tons_per_cy = rebar_per_cy.get(element_type, 0.08)
+            rebar_tonnage = volume_cy * rebar_tons_per_cy
         
         # Calculate costs
         concrete_cost = volume_cy * self.concrete_cost_per_cy

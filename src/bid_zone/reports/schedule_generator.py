@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
+import math
 
 
 class ActivityType(Enum):
@@ -419,11 +420,17 @@ class ScheduleGenerator:
         )
     
     def _add_working_days(self, start_date: datetime, days: float) -> datetime:
-        """Add working days (skip weekends)"""
+        """
+        Add working days (skip weekends).
+        
+        Args:
+            days: Number of working days to add (will be rounded up to nearest whole day)
+        """
         current = start_date
+        days_to_add = math.ceil(days)  # Round up fractional days
         days_added = 0
         
-        while days_added < days:
+        while days_added < days_to_add:
             current += timedelta(days=1)
             # Skip weekends
             if current.weekday() < 5:  # Monday=0, Friday=4
@@ -515,3 +522,4 @@ Total Duration: {self._calculate_total_duration()} days
 
 
 import math
+
