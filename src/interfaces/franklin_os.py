@@ -47,6 +47,9 @@ class FranklinOS:
         # Processing state
         self.current_project = None
         self.processing_history = []
+        self.current_estimate = 0.0
+        self.current_items = 0
+        self.processing_stage = None
         
     def process_project(self, 
                        project_name: str,
@@ -76,6 +79,7 @@ class FranklinOS:
         
         try:
             # Stage 1: File Ingestion
+            self.processing_stage = "File Ingestion"
             print(f"[Franklin OS] Stage 1: Ingesting file: {file_path}")
             file_info = self.ingestion.ingest_file(file_path)
             project['stages']['ingestion'] = {
@@ -85,6 +89,7 @@ class FranklinOS:
             }
             
             # Stage 2: Document Chunking
+            self.processing_stage = "Document Chunking"
             print(f"[Franklin OS] Stage 2: Chunking documents")
             chunks = self.chunker.chunk_document(file_info)
             project['stages']['chunking'] = {
@@ -93,17 +98,56 @@ class FranklinOS:
             }
             print(f"[Franklin OS] Created {len(chunks)} chunks")
             
-            # Stage 3: AI Agent Processing
+            # Stage 3: AI Agent Processing with Real-Time Estimates
+            self.processing_stage = "AI Agent Processing"
+            self.current_estimate = 0.0
+            self.current_items = 0
             print(f"[Franklin OS] Stage 3: Processing with AI agents")
-            agent_results = self.agent_framework.process_chunks(chunks)
+            agent_results = []
+            cumulative_cost = 0.0
+            cumulative_items = 0
+            
+            # Process chunks and show real-time estimates
+            for i, chunk in enumerate(chunks, 1):
+                print(f"[Franklin OS] Processing chunk {i}/{len(chunks)}...")
+                
+                # Process chunk with agents
+                chunk_results = []
+                for agent_type, agent in self.agent_framework.agents.items():
+                    result = agent.process_chunk(chunk)
+                    chunk_results.append(result)
+                    agent_results.append(result)
+                    
+                    # Calculate cost from this result
+                    data = result.get('data', {})
+                    items = data.get('items', [])
+                    chunk_cost = sum(item.get('total', 0.0) for item in items)
+                    cumulative_cost += chunk_cost
+                    cumulative_items += len(items)
+                
+                # Update current estimate for real-time tracking
+                self.current_estimate = cumulative_cost
+                self.current_items = cumulative_items
+                
+                # Display real-time estimate after each chunk
+                print(f"[Franklin OS] ├─ Chunk {i} complete")
+                print(f"[Franklin OS] ├─ Items extracted: {len(chunk_results)} agents × multiple items")
+                print(f"[Franklin OS] ├─ Cumulative cost estimate: ${cumulative_cost:,.2f}")
+                print(f"[Franklin OS] └─ Total items so far: {cumulative_items}")
+                print()
+            
             project['stages']['agent_processing'] = {
                 'status': 'complete',
                 'results_count': len(agent_results),
-                'agents_used': list(self.agent_framework.agents.keys())
+                'agents_used': list(self.agent_framework.agents.keys()),
+                'final_estimate': cumulative_cost,
+                'total_items': cumulative_items
             }
             print(f"[Franklin OS] Agents processed {len(agent_results)} results")
+            print(f"[Franklin OS] Final estimate from agents: ${cumulative_cost:,.2f}")
             
             # Stage 4: Oracle Verification
+            self.processing_stage = "Oracle Verification"
             print(f"[Franklin OS] Stage 4: Oracle verification")
             verification = self.oracle.verify_batch(agent_results)
             project['stages']['verification'] = {
@@ -116,6 +160,7 @@ class FranklinOS:
                   f"(confidence: {verification['average_confidence']:.2%})")
             
             # Stage 5: Nucleus Aggregation
+            self.processing_stage = "Nucleus Aggregation"
             print(f"[Franklin OS] Stage 5: Aggregating results")
             aggregated = self.nucleus.aggregate(agent_results)
             
@@ -131,7 +176,15 @@ class FranklinOS:
             print(f"[Franklin OS] Aggregated: ${aggregated['total_cost']:,.2f} "
                   f"({aggregated['item_count']} items)")
             
+            # Display cost breakdown by CSI Division
+            print(f"[Franklin OS] Cost breakdown by CSI Division:")
+            for division in sorted(aggregated['divisions'].keys()):
+                div_data = aggregated['divisions'][division]
+                print(f"[Franklin OS]   Division {division}: ${div_data['subtotal']:,.2f} "
+                      f"({div_data['item_count']} items)")
+            
             # Stage 6: Excel Export
+            self.processing_stage = "Excel Export"
             print(f"[Franklin OS] Stage 6: Generating Excel estimate")
             metadata = {
                 'project_name': project_name,
@@ -178,8 +231,16 @@ class FranklinOS:
             raise
     
     def get_project_status(self) -> Optional[Dict[str, Any]]:
-        """Get current project status"""
-        return self.current_project
+        """Get current project status with real-time estimate"""
+        if self.current_project is None:
+            return None
+        
+        return {
+            **self.current_project,
+            'processing_stage': self.processing_stage,
+            'current_estimate': self.current_estimate,
+            'current_items': self.current_items
+        }
     
     def get_processing_history(self) -> list:
         """Get history of all processed projects"""
