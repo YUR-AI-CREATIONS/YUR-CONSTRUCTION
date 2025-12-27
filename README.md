@@ -162,6 +162,7 @@ BID-ZONE-/
 - **Multi-API Vision**: OpenAI, Google Vision, Gemini integration
 - **OCR Support**: Process scanned and hand-drawn plans
 - **Progress Tracking**: Stage-by-stage status updates
+- **Real-Time Estimates**: See cumulative costs as processing progresses
 
 ### Professional Output
 - **Excel Estimates**: CSI division organized with formatting
@@ -215,6 +216,7 @@ Comprehensive guides available:
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture details
 - [INSTALLATION.md](INSTALLATION.md) - Detailed installation guide
 - [USER_GUIDE.md](USER_GUIDE.md) - User manual
+- [REALTIME_ESTIMATES.md](REALTIME_ESTIMATES.md) - Real-time cost estimate tracking
 - [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) - Implementation details
 
 ## 🧪 Testing
