@@ -49,12 +49,12 @@ test_data/*.pdf
 test_data/*.zip
 test_data/*.dwg
 
-# Large binary files (sample construction documents)
-*.pdf
-*.zip
-!.github/**/*.pdf
+# Large binary files in root directory (sample construction documents)
+/*.pdf
+/*.zip
 # Allow small documentation PDFs in docs folder if needed
 !docs/**/*.pdf
+!/test_data/.gitkeep
 
 # Logs
 *.log

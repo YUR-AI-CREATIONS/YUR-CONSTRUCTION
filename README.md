@@ -213,6 +213,9 @@ docker-compose logs -f
 ## 📖 Documentation
 
 Comprehensive guides available:
+- [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) - ✅ Deployment readiness report
+- [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - Quick deployment checklist
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Complete deployment guide
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture details
 - [INSTALLATION.md](INSTALLATION.md) - Detailed installation guide
 - [USER_GUIDE.md](USER_GUIDE.md) - User manual
