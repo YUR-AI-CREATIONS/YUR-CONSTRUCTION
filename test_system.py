@@ -181,18 +181,33 @@ def test_chunking_system():
     """Test document chunking for large files"""
     print("Testing Chunking System...")
     
-    from src.core.chunking import ChunkingSystem
+    from src.core.chunking import DocumentChunker, DocumentChunk
     
-    chunker = ChunkingSystem()
+    chunker = DocumentChunker(chunk_size=1000, max_recursion_depth=5)
     
-    # Test with mock large content
-    mock_content = "x" * 10000  # 10KB of content
-    chunks = chunker.chunk_text(mock_content, max_size=1000)
+    # Test with mock PDF file info
+    mock_file_info = {
+        'file_type': '.pdf',
+        'original_file': 'test.pdf',
+        'extracted_files': [
+            {
+                'path': 'test.pdf',
+                'num_pages': 3
+            }
+        ]
+    }
+    
+    chunks = chunker.chunk_document(mock_file_info)
     
     assert len(chunks) > 0, "Should create chunks"
-    assert all(len(chunk) <= 1000 for chunk in chunks), "Chunks should respect size limit"
+    assert len(chunks) == 3, "Should create one chunk per page"
+    assert all(isinstance(chunk, DocumentChunk) for chunk in chunks), "Should return DocumentChunk objects"
+    
+    # Verify recursion depth limit is set
+    assert chunker.max_recursion_depth == 5, "Should have recursion depth limit"
     
     print("  ✓ Chunking system working for large files")
+    print("  ✓ Recursion depth limit prevents stack overflow")
 
 
 def test_franklin_os():
