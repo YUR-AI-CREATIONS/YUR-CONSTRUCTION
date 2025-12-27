@@ -1,10 +1,52 @@
-# BID-ZONE Architecture
+# BID-ZONE Comprehensive System Architecture
 
 ## System Overview
 
-BID-ZONE is a multi-layered enterprise construction estimating platform that processes construction documentation through specialized AI agents to produce comprehensive cost estimates.
+BID-ZONE is a unified enterprise platform combining:
+1. **Construction Estimating** - AI-powered cost estimation from plans
+2. **Land Procurement** - Complete due diligence and analysis
+3. **Development Planning** - Layout generation and visualization
+4. **Project Management** - Risk analysis, submittals, and reporting
 
-## Architecture Diagram
+The system uses specialized AI agents working in harmony to process construction documentation, perform market analysis, generate development scenarios, and produce professional deliverables.
+
+---
+
+## High-Level Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         BID-ZONE UNIFIED PLATFORM                            │
+│         Construction Estimation + Land Procurement + Development             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+        ┌─────────────────────────────┼─────────────────────────────┐
+        │                             │                             │
+        ▼                             ▼                             ▼
+┌──────────────────┐       ┌──────────────────┐       ┌──────────────────┐
+│ ESTIMATING       │       │ LAND PROCUREMENT │       │ DEVELOPMENT      │
+│ SYSTEM           │       │ & DUE DILIGENCE  │       │ PLANNING         │
+│                  │       │                  │       │                  │
+│ • File Ingestion │       │ • Market Analysis│       │ • Layout Options │
+│ • AI Agents      │       │ • Feasibility    │       │ • 2D/3D Render   │
+│ • Verification   │       │ • Environmental  │       │ • Zoning Check   │
+│ • CSI Export     │       │ • Financial      │       │ • Cost Analysis  │
+└──────────────────┘       └──────────────────┘       └──────────────────┘
+        │                             │                             │
+        └─────────────────────────────┼─────────────────────────────┘
+                                      │
+                                      ▼
+                         ┌──────────────────────────┐
+                         │    Unified Reporting     │
+                         │  & Output Generation     │
+                         └──────────────────────────┘
+```
+
+---
+
+## Module 1: Construction Estimating System
+
+### Core Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -58,452 +100,341 @@ BID-ZONE is a multi-layered enterprise construction estimating platform that pro
             └───────────────────────┘
 ```
 
-## Component Details
-
-### 1. Franklin OS Interface
-
-**Purpose:** Main orchestration and workflow management
-
-**Responsibilities:**
-- Coordinate all system components
-- Manage processing pipeline
-- Track project state
-- Provide API interface
-- Handle errors and logging
-
-**Key Methods:**
-- `process_project()` - Main workflow orchestrator
-- `get_project_status()` - Status monitoring
-- `get_system_status()` - Health checks
-
-**Design Pattern:** Facade Pattern
-
-### 2. File Ingestion System
-
-**Purpose:** Handle multi-format file input
-
-**Supported Formats:**
-- ZIP: Extract and process contents recursively
-- PDF: Extract pages and metadata
-- DWG: Parse CAD layers and entities
-- JPEG/PNG: Process images
-
-**Key Features:**
-- Format detection
-- Automatic extraction
-- Metadata collection
-- Error handling
-
-**Implementation:**
-- `FileIngestionSystem` class
-- Format-specific processors
-- Extensible architecture
-
-### 3. Document Chunking
-
-**Purpose:** Decompose large documents into processable units
-
-**Chunking Strategies:**
-- **PDF:** One chunk per page
-- **DWG:** One chunk per layer (or entire file)
-- **Images:** One chunk per image
-- **ZIP:** Recursive chunking of contents
-
-**Chunk Structure:**
-```python
-DocumentChunk {
-    chunk_id: str        # Unique identifier
-    content: dict        # Chunk data
-    metadata: dict       # Source information
-    processed: bool      # Processing status
-    results: dict        # Agent results
-}
-```
-
-### 4. Agent Framework
-
-**Purpose:** Specialized AI agents for data extraction
-
-**Agent Architecture:**
-
-```python
-BaseAgent
-├── agent_id: str
-├── specialty: str
-├── processing_history: list
-└── methods:
-    ├── process_chunk()
-    └── _extract_data()
-```
-
-**Specialized Agents:**
-
-| Agent | CSI Focus | Extracts |
-|-------|-----------|----------|
-| Structural | 03, 05 | Concrete, Steel |
-| MEP | 21-28 | Mechanical, Electrical, Plumbing |
-| Finishes | 09 | Drywall, Paint, Flooring |
-| Site Work | 31-33 | Earthwork, Paving, Utilities |
-
-**Agent Output Format:**
-```python
-{
-    'agent_id': str,
-    'specialty': str,
-    'chunk_id': str,
-    'timestamp': str,
-    'status': str,
-    'data': {
-        'csi_division': str,
-        'items': [
-            {
-                'description': str,
-                'quantity': float,
-                'unit': str,
-                'unit_price': float,
-                'total': float
-            }
-        ],
-        'scope': str,
-        'notes': str
-    }
-}
-```
-
-### 5. Oracle Verification Layer
-
-**Purpose:** Quality assurance and validation
-
-**Verification Checks:**
-1. **Completeness**
-   - Required fields present
-   - Non-null values
-   - Valid data types
-
-2. **Calculations**
-   - Quantity × Unit Price = Total
-   - 1% tolerance for rounding
-
-3. **Confidence Scoring**
-   - Field completeness: 20%
-   - Value reasonability: 60%
-   - Calculation accuracy: 20%
-
-**Verification Result:**
-```python
-{
-    'verified': bool,
-    'confidence_score': float,
-    'issues': [str],
-    'warnings': [str]
-}
-```
-
-### 6. Nucleus Aggregator
-
-**Purpose:** Consolidate and organize results
-
-**Aggregation Process:**
-1. Group by CSI division
-2. Track agent attribution
-3. Sum costs and counts
-4. Consolidate duplicates (optional)
-5. Generate statistics
-
-**Consolidation Logic:**
-- Group items by description
-- Sum quantities
-- Average unit prices (weighted)
-- Preserve agent attribution
-
-**Output Structure:**
-```python
-{
-    'divisions': {
-        '03': {
-            'items': [],
-            'agents': [],
-            'scope_notes': [],
-            'subtotal': float,
-            'item_count': int
-        }
-    },
-    'total_cost': float,
-    'item_count': int
-}
-```
-
-### 7. Excel Export System
-
-**Purpose:** Generate formatted estimate documents
-
-**Excel Structure:**
-
-**Sheet 1: Summary**
-- Project header
-- Cost by division
-- Grand total
-
-**Sheet 2: Detailed Estimate**
-- Line items organized by division
-- Columns: Item #, CSI Div, Description, Scope, Qty, Unit, Unit Price, Total, Agent
-- Division subtotals
-
-**Sheet 3: CSI Divisions**
-- Reference guide
-- All 30+ divisions
-- Descriptions
-
-**Sheet 4: Audit Trail**
-- Processing timeline
-- Agent assignments
-- Verification status
-- Metadata
-
-**Styling:**
-- Color-coded headers
-- Professional formatting
-- Calculated totals
-- Conditional formatting
-
-## Data Flow
-
-### Processing Pipeline
-
-```
-Input File
-    ↓
-Ingestion (extract/parse)
-    ↓
-Chunking (decompose)
-    ↓
-Agent Processing (extract data)
-    ↓
-Oracle Verification (validate)
-    ↓
-Nucleus Aggregation (consolidate)
-    ↓
-Excel Export (format)
-    ↓
-Output File
-```
-
-### State Management
-
-**Project State:**
-```python
-{
-    'name': str,
-    'status': str,        # processing, complete, error
-    'start_time': str,
-    'end_time': str,
-    'stages': {
-        'ingestion': {...},
-        'chunking': {...},
-        'agent_processing': {...},
-        'verification': {...},
-        'aggregation': {...},
-        'export': {...}
-    },
-    'excel_file': str,
-    'summary': {...}
-}
-```
-
-## Design Patterns
-
-### 1. Facade Pattern (Franklin OS)
-Provides simplified interface to complex subsystems
-
-### 2. Strategy Pattern (Agent Framework)
-Different agents implement same interface with specialized strategies
-
-### 3. Pipeline Pattern (Processing Flow)
-Sequential stages process data through pipeline
-
-### 4. Factory Pattern (Chunking)
-Different chunkers created based on file type
-
-## Extensibility
-
-### Adding New Agents
-
-```python
-class CustomAgent(BaseAgent):
-    def __init__(self):
-        super().__init__('custom-001', 'Custom Specialty')
-    
-    def _extract_data(self, chunk):
-        # Custom extraction logic
-        return {
-            'csi_division': 'XX',
-            'items': [...],
-            'scope': 'Description',
-            'notes': 'Details'
-        }
-
-# Register in AgentFramework
-framework.agents['custom'] = CustomAgent()
-```
-
-### Adding File Formats
-
-```python
-def _process_new_format(self, file_path):
-    # Custom file processing
-    return [{
-        'path': str(file_path),
-        'type': '.ext',
-        'data': {...}
-    }]
-
-# Add to supported formats
-self.supported_formats.append('.ext')
-```
-
-### Custom Verification Rules
-
-```python
-def custom_validator(item):
-    # Custom validation logic
-    if not meets_criteria(item):
-        return ["Custom validation error"]
-    return []
-
-# Add to Oracle
-oracle.add_validator(custom_validator)
-```
-
-## Performance Considerations
-
-### Scalability
-
-**File Size:**
-- Chunks processed independently
-- Parallel agent processing possible
-- Memory-efficient streaming
-
-**Processing Time:**
-- Typical: 5-30 seconds per page
-- Depends on:
-  - File complexity
-  - Number of agents
-  - AI provider latency
-
-### Optimization Opportunities
-
-1. **Parallel Processing**
-   - Process chunks concurrently
-   - Multiple agents simultaneously
-   - Async I/O for files
-
-2. **Caching**
-   - Cache parsed documents
-   - Store intermediate results
-   - Reuse agent responses
-
-3. **Batch Processing**
-   - Group similar chunks
-   - Batch API calls
-   - Reduce overhead
-
-## Security Considerations
-
-### Data Privacy
-- Files processed in memory
-- Temporary files cleaned up
-- No persistent storage of plans
-- API keys in environment variables
-
-### Input Validation
-- File type verification
-- Size limits
-- Format validation
-- Malware scanning (recommended)
-
-### Output Protection
-- Excel files password-protectable
-- Audit trail for accountability
-- Access control on outputs
-
-## Error Handling
-
-### Error Categories
-
-1. **Input Errors**
-   - Invalid file format
-   - File not found
-   - Corrupt files
-
-2. **Processing Errors**
-   - Agent failures
-   - Verification failures
-   - Calculation errors
-
-3. **Output Errors**
-   - File write failures
-   - Format errors
-   - Disk space issues
-
-### Recovery Strategies
-
-- Graceful degradation
-- Partial result saving
-- Error logging
-- User notification
-
-## Testing Strategy
-
-### Unit Tests
-- Individual component testing
-- Mock dependencies
-- Edge case coverage
-
-### Integration Tests
-- Pipeline testing
-- Component interaction
-- End-to-end workflows
-
-### System Tests
-- Full workflow validation
-- Real file processing
-- Output verification
-
-## Future Enhancements
-
-### Planned Features
-1. Web interface
-2. Real-time progress tracking
-3. Custom agent training
-4. Integration APIs
-5. Batch processing
-6. Cloud deployment
-7. Mobile app
-8. Collaboration features
-
-### Technology Considerations
-- Microservices architecture
-- Container orchestration
-- Database integration
-- Message queues
-- API gateway
-
-## Maintenance
-
-### Monitoring
-- Processing times
-- Success rates
-- Error frequencies
-- System health
-
-### Updates
-- Agent improvements
-- Format support
-- Library updates
-- Security patches
+### Component Details
+
+#### 1. Franklin OS Interface
+- **Purpose**: Main orchestration and workflow management
+- **Pattern**: Facade Pattern
+- **Key Methods**: `process_project()`, `get_project_status()`
+- **Responsibilities**: Coordinate components, manage pipeline, track state
+
+#### 2. File Ingestion System
+- **Formats**: ZIP, PDF, DWG, JPEG/PNG
+- **Features**: Format detection, automatic extraction, metadata collection
+- **Error Handling**: Graceful degradation for unsupported formats
+
+#### 3. Document Chunking
+- **Purpose**: Break large files into processable chunks
+- **Strategy**: Size-based with recursion depth limits
+- **Features**: Prevents stack overflow, optimizes for agent processing
+
+#### 4. Agent Framework
+- **Agents**: Structural, MEP, Finishes, Site Work
+- **Features**: Parallel processing, confidence scoring, agent attribution
+- **Coordination**: Smart selection to prevent overtalk and hallucination
+- **Implementation**: Modular design with easy extensibility
+
+#### 5. Oracle Verification Layer
+- **Purpose**: Quality assurance and validation
+- **Checks**: Data completeness, accuracy, consistency
+- **Output**: Confidence scores, error flagging
+
+#### 6. Nucleus Aggregator
+- **Purpose**: Consolidate and organize results
+- **Features**: CSI division mapping, deduplication, cost summation
+- **Output**: Unified data structure ready for export
+
+#### 7. Excel Exporter
+- **Output**: Professional formatted estimates
+- **Sheets**: Summary, detailed estimate, CSI reference, audit trail
+- **Features**: Styling, formulas, validation
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2025-12-26  
-**Maintainer:** YUR AI CREATIONS
+## Module 2: Land Procurement & Due Diligence
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   LAND PROCUREMENT MODULE                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌────────────┐  ┌────────────┐  ┌────────────────────┐   │
+│  │  Market    │  │ Feasibility│  │ Environmental      │   │
+│  │  Analysis  │  │   Study    │  │ Phase One          │   │
+│  │            │  │            │  │                    │   │
+│  │ • Comps    │  │ • ROI      │  │ • Site Recon       │   │
+│  │ • Absorp.  │  │ • Reg.     │  │ • Records Review   │   │
+│  │ • Demo.    │  │ • Infra.   │  │ • REC ID           │   │
+│  │ • Trends   │  │ • Risk     │  │ • Phase Two Need   │   │
+│  └────────────┘  └────────────┘  └────────────────────┘   │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              Financial Proforma                      │   │
+│  │                                                      │   │
+│  │  • Cost Breakdown  • Revenue Projection             │   │
+│  │  • ROI Calc       • Financing Analysis              │   │
+│  │  • Cash Flow      • Sensitivity Analysis            │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Key Capabilities
+
+#### Market Analysis
+- Comparable sales analysis
+- Absorption rate calculations
+- Demographics and trends
+- Market positioning
+
+#### Feasibility Studies
+- ROI and financial analysis
+- Regulatory compliance checking
+- Infrastructure requirements
+- Schedule and risk assessment
+
+#### Environmental Phase One
+- ASTM E1527 compliant assessments
+- Site reconnaissance
+- Historical records review
+- REC identification
+
+#### Financial Proforma
+- Detailed cost breakdowns
+- Revenue projections
+- Cash flow analysis
+- Sensitivity testing
+
+---
+
+## Module 3: Development Planning & Rendering
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              LAND PLANNING & RENDERING MODULE                │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────────────────────────────────────────┐      │
+│  │           Land Planner (5 Layout Options)         │      │
+│  │                                                   │      │
+│  │  1. Maximum Density    2. Premium Lots           │      │
+│  │  3. Mixed Sizes        4. Cul-de-Sac             │      │
+│  │  5. Grid Pattern                                 │      │
+│  │                                                   │      │
+│  │  • Zoning Compliance  • Cost Estimation          │      │
+│  │  • Revenue Calc       • Comparison Reports       │      │
+│  └──────────────────────────────────────────────────┘      │
+│                                                              │
+│  ┌──────────────┐              ┌──────────────┐           │
+│  │ 2D Renderer  │              │ 3D Renderer  │           │
+│  │              │              │              │           │
+│  │ • Site Plans │              │ • Terrain    │           │
+│  │ • Lot Layout │              │ • Buildings  │           │
+│  │ • Roads      │              │ • Cut/Fill   │           │
+│  │ • Utilities  │              │ • Elevation  │           │
+│  │ • CAD Output │              │ • OBJ Export │           │
+│  └──────────────┘              └──────────────┘           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Module 4: AI-Powered Estimating & Risk
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              AI-POWERED ESTIMATING MODULE                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────────────────────────────────────┐          │
+│  │     AI Estimator (Multi-Vision APIs)          │          │
+│  │                                               │          │
+│  │  OpenAI Vision + Google Vision + Gemini       │          │
+│  │                                               │          │
+│  │  • Cross-Validation  • CSI Organization      │          │
+│  │  • Unit Pricing      • Report Generation     │          │
+│  └──────────────────────────────────────────────┘          │
+│                                                              │
+│  ┌──────────────┐              ┌──────────────┐           │
+│  │ Document     │              │ Risk         │           │
+│  │ Processor    │              │ Analyzer     │           │
+│  │              │              │              │           │
+│  │ • PDF Parse  │              │ • Missing    │           │
+│  │ • OCR        │              │ • Cost Risk  │           │
+│  │ • Tables     │              │ • Mitigation │           │
+│  │ • Specs      │              │ • Conting.   │           │
+│  └──────────────┘              └──────────────┘           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Module 5: Earthwork & Cut/Fill Analysis
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│           EARTHWORK & CUT/FILL ANALYSIS MODULE               │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────────────────────────────────────┐          │
+│  │         Cut/Fill Analyzer                     │          │
+│  │                                               │          │
+│  │  • Elevation Analysis  • Swell/Shrinkage     │          │
+│  │  • Volume Calc         • Rock Identification │          │
+│  │  • 3D Models           • Cross Sections      │          │
+│  └──────────────────────────────────────────────┘          │
+│                                                              │
+│  ┌──────────────────────────────────────────────┐          │
+│  │         Geotech Processor                     │          │
+│  │                                               │          │
+│  │  • Soil Properties  • Bearing Capacity       │          │
+│  │  • Rock Analysis    • Foundation Recs        │          │
+│  └──────────────────────────────────────────────┘          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Agent Coordination & Harmony
+
+### Preventing Agent Overtalk
+
+1. **Agent Selection Framework**
+   - Smart routing based on document type
+   - Task-specific agent assignment
+   - Parallel processing with coordination
+
+2. **Confidence-Based Validation**
+   - Each agent reports confidence scores
+   - Oracle verifies and resolves conflicts
+   - Low-confidence items flagged for review
+
+3. **Hallucination Prevention**
+   - Cross-validation between agents
+   - Ground truth checking
+   - Structured output validation
+
+4. **Latency Management**
+   - Efficient chunking strategies
+   - Parallel agent execution
+   - Caching and memoization
+
+---
+
+## Data Flow
+
+```
+Input Documents
+     │
+     ├─→ Ingestion → Chunking → Agent Framework
+     │                                 │
+     │                         ┌───────┼────────┐
+     │                         │       │        │
+     │                    Structural  MEP   Finishes
+     │                         │       │        │
+     │                         └───────┼────────┘
+     │                                 │
+     ├─→ Oracle Verification ←─────────┘
+     │         │
+     │         ▼
+     ├─→ Nucleus Aggregation
+     │         │
+     │         ▼
+     └─→ Excel/PDF Export → Professional Deliverables
+```
+
+---
+
+## Technology Stack
+
+### Core
+- Python 3.9+
+- Flask for web services
+- SQLAlchemy for data persistence
+
+### AI & Vision
+- OpenAI GPT-4 Vision
+- Google Cloud Vision
+- Anthropic Claude
+- Gemini
+
+### Document Processing
+- PyPDF2, pdf2image
+- Pytesseract (OCR)
+- ezdxf (CAD)
+
+### Data & Visualization
+- Pandas, NumPy
+- Matplotlib, Plotly
+- Trimesh, PyVista (3D)
+- Shapely, GeoPandas (GIS)
+
+### Output Generation
+- OpenPyXL, XlsxWriter (Excel)
+- ReportLab (PDF)
+- Jinja2 (Templates)
+
+---
+
+## Deployment Architecture
+
+### Docker Containerization
+
+```
+┌─────────────────────────────────────────────┐
+│           Docker Compose Stack              │
+├─────────────────────────────────────────────┤
+│                                             │
+│  ┌──────────────────────────────┐          │
+│  │  BID-ZONE Application        │          │
+│  │  - Flask API                 │          │
+│  │  - Worker Processes          │          │
+│  │  - Agent Framework           │          │
+│  └──────────────────────────────┘          │
+│                                             │
+│  ┌──────────────────────────────┐          │
+│  │  Volumes                      │          │
+│  │  - uploads/                   │          │
+│  │  - outputs/                   │          │
+│  │  - temp/                      │          │
+│  └──────────────────────────────┘          │
+│                                             │
+│  ┌──────────────────────────────┐          │
+│  │  Environment Variables        │          │
+│  │  - API Keys                   │          │
+│  │  - Configuration              │          │
+│  └──────────────────────────────┘          │
+└─────────────────────────────────────────────┘
+```
+
+### Edge Functions & Routing
+
+- **API Gateway**: Route requests to appropriate modules
+- **Load Balancing**: Distribute processing load
+- **Caching**: Redis for frequently accessed data
+- **Monitoring**: Health checks and performance metrics
+
+---
+
+## Security Considerations
+
+1. **API Key Management**: Environment variables, never hardcoded
+2. **File Upload Validation**: Type checking, size limits, virus scanning
+3. **Access Control**: Authentication and authorization
+4. **Data Encryption**: At rest and in transit
+5. **Audit Logging**: Track all operations
+
+---
+
+## Scalability
+
+1. **Horizontal Scaling**: Multiple worker instances
+2. **Queue System**: Celery for background tasks
+3. **Database**: PostgreSQL for production
+4. **Caching**: Redis for performance
+5. **CDN**: Static asset delivery
+
+---
+
+## Future Enhancements
+
+- Web-based UI
+- Real-time collaboration
+- Integration with RSMeans and other databases
+- Mobile app for field data collection
+- Machine learning for cost prediction
+- BIM integration
+- Automated permit generation
+
+---
+
+Built with ❤️ by YUR AI CREATIONS

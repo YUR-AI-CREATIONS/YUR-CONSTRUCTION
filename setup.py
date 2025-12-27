@@ -22,14 +22,15 @@ if requirements_file.exists():
 setup(
     name='bid-zone',
     version='1.0.0',
-    description='Enterprise Construction Estimating Platform',
+    description='Comprehensive Construction Estimating and Land Procurement Platform',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='YUR AI CREATIONS',
     license='MIT',
-    packages=find_packages(),
+    packages=find_packages(where='src'),
+    package_dir={'': 'src'},
     install_requires=requirements,
-    python_requires='>=3.8',
+    python_requires='>=3.9',
     entry_points={
         'console_scripts': [
             'bid-zone=main:main',
@@ -40,12 +41,11 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Topic :: Office/Business',
         'Topic :: Scientific/Engineering',
     ],
-    keywords='construction estimating ai csi cost-estimation',
+    keywords='construction estimating ai csi cost-estimation land-procurement due-diligence',
 )

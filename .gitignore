@@ -39,7 +39,9 @@ ENV/
 # Uploads and outputs
 uploads/
 outputs/
+output/
 temp/
+tmp/
 *.tmp
 
 # Test data
@@ -58,3 +60,8 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+.tox/
+
+# Database
+*.db
+*.sqlite3
