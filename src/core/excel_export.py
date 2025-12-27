@@ -11,7 +11,7 @@ from datetime import datetime
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
-from utils.csi_divisions import get_division_name, get_all_divisions
+from ..utils.csi_divisions import get_division_name, get_all_divisions
 
 
 class ExcelExporter:

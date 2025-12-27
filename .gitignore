@@ -44,10 +44,17 @@ temp/
 tmp/
 *.tmp
 
-# Test data
+# Test data and sample files
 test_data/*.pdf
 test_data/*.zip
 test_data/*.dwg
+
+# Large binary files (sample construction documents)
+*.pdf
+*.zip
+!.github/**/*.pdf
+# Allow small documentation PDFs in docs folder if needed
+!docs/**/*.pdf
 
 # Logs
 *.log
