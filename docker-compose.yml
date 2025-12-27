@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  bid-zone:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bid-zone-app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      # AI API Keys
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      
+      # Database
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///bid_zone.db}
+      
+      # Application
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - FLASK_DEBUG=${FLASK_DEBUG:-False}
+      - SECRET_KEY=${SECRET_KEY}
+      
+      # Storage
+      - UPLOAD_FOLDER=/app/uploads
+      - OUTPUT_FOLDER=/app/outputs
+      - TEMP_FOLDER=/app/temp
+      
+      # AI Settings
+      - AI_MODEL=${AI_MODEL:-gpt-4}
+      - ENABLE_AGENT_COORDINATION=True
+      - MAX_PARALLEL_AGENTS=4
+      
+      # Performance
+      - WORKERS=${WORKERS:-4}
+      - TIMEOUT=${TIMEOUT:-300}
+      
+    volumes:
+      - ./uploads:/app/uploads
+      - ./outputs:/app/outputs
+      - ./temp:/app/temp
+      - ./logs:/app/logs
+    
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    networks:
+      - bid-zone-network
+
+  # Optional: Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: bid-zone-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - bid-zone-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  bid-zone-network:
+    driver: bridge
+
+volumes:
+  redis-data:
