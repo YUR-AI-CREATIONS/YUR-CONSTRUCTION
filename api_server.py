@@ -156,6 +156,35 @@ def list_projects():
         }), 500
 
 
+@app.route('/api/estimate/current', methods=['GET'])
+def get_current_estimate():
+    """Get real-time estimate of current processing project"""
+    try:
+        franklin_os = get_franklin()
+        status = franklin_os.get_project_status()
+        
+        if status is None:
+            return jsonify({
+                'message': 'No project currently being processed'
+            }), 404
+        
+        return jsonify({
+            'project_name': status.get('name'),
+            'processing_stage': status.get('processing_stage'),
+            'current_estimate': status.get('current_estimate', 0.0),
+            'current_items': status.get('current_items', 0),
+            'status': status.get('status'),
+            'stages': status.get('stages', {})
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting current estimate: {str(e)}")
+        return jsonify({
+            'error': 'Failed to get current estimate',
+            'message': str(e)
+        }), 500
+
+
 @app.errorhandler(404)
 def not_found(error):
     """Handle 404 errors"""
