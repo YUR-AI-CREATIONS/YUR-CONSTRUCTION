@@ -1,4 +1,6 @@
-# Python
+python main.py --project "Test Project" --file your_plan.pdf
+python test_system.pypython main.py --project "Test Project" --file your_plan.pdf
+python test_system.pydirdir# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -44,17 +46,24 @@ temp/
 tmp/
 *.tmp
 
-# Test data and sample files
-test_data/*.pdf
-test_data/*.zip
-test_data/*.dwg
 
-# Large binary files in root directory (sample construction documents)
-/*.pdf
-/*.zip
+# === TEST DATA & REAL-WORLD CASES ===
+# The following lines are temporarily commented out to allow tracking of real-world test files for pre-deployment validation and logging.
+# Restore these lines before production deployment to avoid leaking sensitive or large files.
+# test_data/*.pdf
+# test_data/*.zip
+# test_data/*.dwg
+# /*.pdf
+# /*.zip
+
 # Allow small documentation PDFs in docs folder if needed
 !docs/**/*.pdf
 !/test_data/.gitkeep
+
+# === LOGGING & RESULTS ===
+# You may want to track logs and structured results during testing. Remove '*.log' and add a results/ folder if you want to version these outputs.
+#*.log
+#results/
 
 # Logs
 *.log
@@ -72,3 +81,6 @@ htmlcov/
 # Database
 *.db
 *.sqlite3
+
+# List files and directories
+ls
