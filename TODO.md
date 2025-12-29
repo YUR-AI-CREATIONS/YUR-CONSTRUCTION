@@ -1,0 +1,34 @@
+# BID-ZONE Automation Todo List
+
+- [x] Plan scenario automation roadmap
+  - Outline the top scenarios (agreement generation, compliance, market reporting, district connectivity) and select best-practice modeling approaches for each.
+- [ ] Automate use case ingestion and workflow orchestration
+  - Design and scaffold a workflow to ingest user scenarios and route them to the correct modules/agents.
+- [ ] Build agreement generation module (MUD, PID, PPP, TERZ)
+  - Implement a module using template-based and AI-assisted drafting, with compliance checks and audit trail.
+- [ ] Automate code/compliance ingestion and analysis
+  - Expand document ingestion to handle city/county codes and specs, using NLP and chunking for rule extraction.
+- [ ] Implement market reporting and forecasting
+  - Integrate market data sources and build reporting/forecasting using top-rated analyst modeling (e.g., Prophet, XGBoost, statsmodels).
+- [ ] Connect to Texas district data sources
+  - Build connectors to public APIs and GIS for all Texas districts, automate compliance and data refresh.
+- [ ] Automate logging and results output
+  - Ensure all scenario runs are logged to results/ for audit and reproducibility.
+- [ ] Build construction estimating for all divisions
+  - Implement detailed estimating logic for all CSI divisions, including cost, productivity, and unit rates.
+- [ ] Build bid aggregator for public and subscription sites
+  - Create aggregator to collect bids from public APIs and subscription-based sources.
+- [ ] Implement in-depth market analysis (residential, commercial, multifamily)
+  - Develop modules for market analysis, segmentation, and forecasting for all property types.
+- [ ] Build risk analysis reporting
+  - Automate risk analysis and reporting for projects, including financial, regulatory, and market risks.
+- [ ] Implement material procurement and tracking
+  - Automate procurement, post-purchase tracking, and price optimization for materials.
+- [ ] On-ground market analysis for lots
+  - Develop modules for on-ground analysis of residential, commercial, and multifamily lots.
+- [ ] Permit reporting per county
+  - Automate permit reporting for all projects in permitting stage, including project details and engineer contacts.
+- [ ] Foreclosure and auction asset aggregation
+  - Build aggregator for foreclosures and auction assets, with reporting and contact info.
+- [ ] Development agreement strategy module
+  - Design agreements using historical data, city council sentiment, and behavioral analytics.
