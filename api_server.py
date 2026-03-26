@@ -20,8 +20,16 @@ from src.interfaces.franklin_os import FranklinOS
 # Load environment variables
 load_dotenv()
 
+# Ensure upload/output dirs exist (use /tmp on Render, local otherwise)
+UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "/tmp/uploads")
+OUTPUT_FOLDER = os.getenv("OUTPUT_FOLDER", "/tmp/outputs")
+Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
+Path(OUTPUT_FOLDER).mkdir(parents=True, exist_ok=True)
+
 # Initialize Flask app
 app = Flask(__name__)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["OUTPUT_FOLDER"] = OUTPUT_FOLDER
 CORS(app)
 
 # Configure logging
@@ -38,7 +46,10 @@ def get_franklin():
     """Get or create FranklinOS instance"""
     global franklin
     if franklin is None:
-        franklin = FranklinOS()
+        franklin = FranklinOS(config={
+            "upload_folder": UPLOAD_FOLDER,
+            "output_folder": OUTPUT_FOLDER,
+        })
     return franklin
 
 
@@ -97,9 +108,9 @@ def upload_file():
             return jsonify({'error': 'No file selected'}), 400
         
         # Save file
-        upload_folder = os.getenv('UPLOAD_FOLDER', 'uploads')
-        os.makedirs(upload_folder, exist_ok=True)
-        
+        upload_folder = app.config.get("UPLOAD_FOLDER", UPLOAD_FOLDER)
+        Path(upload_folder).mkdir(parents=True, exist_ok=True)
+
         file_path = os.path.join(upload_folder, file.filename)
         file.save(file_path)
         
